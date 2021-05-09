@@ -3,8 +3,7 @@ const router = express.Router();
 const Contacts = require("../../model/index");
 const {
   validateCreateContact,
-  validateStatusVaccinatedCat,
-  validateUpdateCat,
+  validateUpdateContact,
 } = require("./validation");
 
 router.get("/", async (req, res, next) => {
@@ -61,8 +60,32 @@ router.delete("/:contactId", async (req, res, next) => {
   }
 });
 
-router.patch("/:contactId", async (req, res, next) => {
-  res.json({ message: "template message" });
+router.put("/:contactId", validateUpdateContact, async (req, res, next) => {
+  try {
+    // Проверка на пустое тело
+    if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
+      console.log(req.body);
+      return res.status(400).json({
+        message: "missing fields",
+      });
+    }
+    const updateContact = await Contacts.updateContact(
+      req.params.contactId,
+      req.body
+    );
+    // Проверка прошло ли изменение
+    if (updateContact !== "") {
+      return res
+        .status(200)
+        .json({ status: "success", code: 200, data: updateContact });
+    }
+
+    return res.status(404).json({
+      message: "Not found",
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

@@ -28,19 +28,28 @@ const schemaCreateContact = Joi.object({
     }),
 });
 
-const schemaUpdateCat = Joi.object({
-  name: Joi.string().alphanum().min(2).max(30).required(),
+const validateUpdateContact = Joi.object({
+  name: Joi.string().alphanum().min(2).max(30).optional().messages({
+    "string.empty": `"missing required name field`,
+  }),
   email: Joi.string()
     .email({
       minDomainSegments: 2,
-      tlds: { allow: ["com", "net"] },
+      tlds: { allow: false },
     })
-    .required(),
-  phone: Joi.number().required(),
-});
-
-const schemaStatusVaccinatedCat = Joi.object({
-  isVaccinated: Joi.boolean().required(),
+    .optional()
+    .messages({
+      "string.empty": `"missing required name field`,
+    })
+    .messages({
+      "string.empty": `"missing required name field`,
+    }),
+  phone: Joi.string()
+    .regex(/^\(\d{3}\) \d{3}-\d{4}$/)
+    .optional()
+    .messages({
+      "string.empty": `"missing required name field`,
+    }),
 });
 
 const validate = async (schema, body, next) => {
@@ -56,9 +65,6 @@ module.exports.validateCreateContact = (req, _res, next) => {
   return validate(schemaCreateContact, req.body, next);
 };
 
-module.exports.validateUpdateCat = (req, _res, next) => {
-  return validate(schemaUpdateCat, req.body, next);
-};
-module.exports.validateStatusVaccinatedCat = (req, _res, next) => {
-  return validate(schemaStatusVaccinatedCat, req.body, next);
+module.exports.validateUpdateContact = (req, _res, next) => {
+  return validate(validateUpdateContact, req.body, next);
 };
