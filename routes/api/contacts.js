@@ -4,6 +4,7 @@ const Contacts = require("../../model/index");
 const {
   validateCreateContact,
   validateUpdateContact,
+  validateUpdateFavorite,
 } = require("./validation");
 
 router.get("/", async (req, res, next) => {
@@ -48,9 +49,9 @@ router.delete("/:contactId", async (req, res, next) => {
   try {
     const isRemove = await Contacts.removeContact(req.params.contactId);
     if (isRemove) {
-      return res.status(200).json({
-        message: "contact deleted",
-      });
+      return res
+        .status(200)
+        .json({ status: "success", code: 200, data: isRemove });
     }
     return res.status(404).json({
       message: "Not found",
@@ -87,5 +88,28 @@ router.put("/:contactId", validateUpdateContact, async (req, res, next) => {
     next(error);
   }
 });
+
+router.patch(
+  "/:id/favorite",
+  validateUpdateFavorite,
+  async (req, res, next) => {
+    try {
+      const responce = await Contacts.updateStatusContact(
+        req.params.id,
+        req.body
+      );
+      if (responce) {
+        return res
+          .status(200)
+          .json({ status: "success", code: 200, data: responce });
+      }
+      return res
+        .status(404)
+        .json({ status: "error", code: 404, message: "Not Found" });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 module.exports = router;

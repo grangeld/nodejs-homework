@@ -52,6 +52,12 @@ const validateUpdateContact = Joi.object({
     }),
 });
 
+const validateUpdateFavorite = Joi.object({
+  favorite: Joi.boolean().required().messages({
+    "string.empty": "missing field favorite",
+  }),
+});
+
 const validate = async (schema, body, next) => {
   try {
     await schema.validateAsync(body);
@@ -67,4 +73,8 @@ module.exports.validateCreateContact = (req, _res, next) => {
 
 module.exports.validateUpdateContact = (req, _res, next) => {
   return validate(validateUpdateContact, req.body, next);
+};
+
+module.exports.validateUpdateFavorite = (req, _res, next) => {
+  return validate(validateUpdateFavorite, req.body, next);
 };
