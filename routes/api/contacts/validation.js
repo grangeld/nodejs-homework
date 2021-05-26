@@ -14,11 +14,8 @@ const schemaCreateContact = Joi.object({
     .messages({
       "string.empty": `"missing required name field`,
       "any.required": `missing required name field`,
-    })
-    .messages({
-      "string.empty": `"missing required name field`,
-      "any.required": `missing required name field`,
     }),
+
   phone: Joi.string()
     .regex(/^\(\d{3}\) \d{3}-\d{4}$/)
     .required()
