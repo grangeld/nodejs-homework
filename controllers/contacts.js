@@ -1,26 +1,24 @@
-const express = require("express");
-const router = express.Router();
-const Contacts = require("../../model/index");
-const {
-  validateCreateContact,
-  validateUpdateContact,
-  validateUpdateFavorite,
-} = require("./validation");
+const Contacts = require("../model/index");
 
-router.get("/", async (req, res, next) => {
+const getAll = async (req, res, next) => {
   try {
-    const contactAll = await Contacts.listContacts();
+    const userId = req.user.id;
+    const contactAll = await Contacts.listContacts(userId);
     return res
       .status(200)
       .json({ status: "success", code: 200, data: contactAll });
   } catch (error) {
     next(error);
   }
-});
+};
 
-router.get("/:contactId", async (req, res, next) => {
+const getById = async (req, res, next) => {
   try {
-    const contact = await Contacts.getContactById(req.params.contactId);
+    const userId = req.user.id;
+    const contact = await await Contacts.getContactById(
+      userId,
+      req.params.contactId
+    );
     if (contact)
       return res
         .status(200)
@@ -32,22 +30,24 @@ router.get("/:contactId", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
+};
 
-router.post("/", validateCreateContact, async (req, res, next) => {
+const create = async (req, res, next) => {
   try {
-    const contact = await Contacts.addContact(req.body);
+    const userId = req.user.id;
+    const contact = await Contacts.addContact({ ...req.body, owner: userId });
     return res
       .status(201)
       .json({ status: "success", code: 201, data: contact });
   } catch (error) {
     next(error);
   }
-});
+};
 
-router.delete("/:contactId", async (req, res, next) => {
+const remove = async (req, res, next) => {
   try {
-    const isRemove = await Contacts.removeContact(req.params.contactId);
+    const userId = req.user.id;
+    const isRemove = await Contacts.removeContact(userId, req.params.contactId);
     if (isRemove) {
       return res
         .status(200)
@@ -59,10 +59,11 @@ router.delete("/:contactId", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
+};
 
-router.put("/:contactId", validateUpdateContact, async (req, res, next) => {
+const update = async (req, res, next) => {
   try {
+    const userId = req.user.id;
     // Проверка на пустое тело
     if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
       console.log(req.body);
@@ -71,6 +72,7 @@ router.put("/:contactId", validateUpdateContact, async (req, res, next) => {
       });
     }
     const updateContact = await Contacts.updateContact(
+      userId,
       req.params.contactId,
       req.body
     );
@@ -87,29 +89,34 @@ router.put("/:contactId", validateUpdateContact, async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
+};
 
-router.patch(
-  "/:id/favorite",
-  validateUpdateFavorite,
-  async (req, res, next) => {
-    try {
-      const responce = await Contacts.updateStatusContact(
-        req.params.id,
-        req.body
-      );
-      if (responce) {
-        return res
-          .status(200)
-          .json({ status: "success", code: 200, data: responce });
-      }
+const updateStatus = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const responce = await Contacts.updateStatusContact(
+      userId,
+      req.params.id,
+      req.body
+    );
+    if (responce) {
       return res
-        .status(404)
-        .json({ status: "error", code: 404, message: "Not Found" });
-    } catch (error) {
-      next(error);
+        .status(200)
+        .json({ status: "success", code: 200, data: responce });
     }
+    return res
+      .status(404)
+      .json({ status: "error", code: 404, message: "Not Found" });
+  } catch (error) {
+    next(error);
   }
-);
+};
 
-module.exports = router;
+module.exports = {
+  getAll,
+  getById,
+  remove,
+  update,
+  updateStatus,
+  create,
+};
