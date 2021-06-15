@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const gravatar = require("gravatar");
 const { Schema } = mongoose;
 const bcrypt = require("bcryptjs");
+const { nanoid } = require("nanoid");
 const SALT_FACTOR = 6;
 
 const userSchema = new Schema({
@@ -26,6 +27,15 @@ const userSchema = new Schema({
   token: {
     type: String,
     default: null,
+  },
+  veryfy: {
+    type: Boolean,
+    default: false,
+  },
+  veryfyToken: {
+    type: String,
+    required: true,
+    default: nanoid(),
   },
   avatarURL: {
     type: String,

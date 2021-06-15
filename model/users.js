@@ -20,10 +20,21 @@ const updateToken = async (id, token) => {
 const updateAvatar = async (id, avatarURL, userIdImg = null) => {
   return await User.updateOne({ _id: id }, { avatarURL, userIdImg });
 };
+
+const getUserByVerifyToken = async (token) => {
+  return await User.findOne({ verifyToken: token });
+};
+
+const updateVerifyToken = async (id, verify, token) => {
+  return await User.updateOne({ _id: id }, { verify, verifyToken: token });
+};
+
 module.exports = {
   findById,
   findByEmail,
   create,
   updateToken,
   updateAvatar,
+  getUserByVerifyToken,
+  updateVerifyToken,
 };
